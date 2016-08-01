@@ -43,7 +43,7 @@ library(covEB)
  
  	samplecov<-cov(x)
  
- 	test<-covEB(samplecov,delta=0.05,shift=0.025,startlambda=0.4)
+ 	test<-covEB(samplecov,delta=0.05,shift=0.025,startlambda=0.4,n=500)
 
 
 @
@@ -68,7 +68,7 @@ edata<-Edata[which(variances>quantile(variances,0.8)),]
 covmat<-cov(t(edata))
 cormat<-cov2cor(covmat)
 #we are now able to use covmat as input into covEB:
-out<-covEB(covmat,0.2,0.1,startlambda=0.6)
+out<-covEB(covmat,0.2,0.1,startlambda=0.6,n=40)
 @
 
 We now provide an example of how the output may be used. We can visualise the correlations between genes using functions available in R and its associated packages. First we use simple thresholding to define significant correlations, we create adjacency matrices for graphs, setting correlations below 0.65 to zero.

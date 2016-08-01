@@ -1,7 +1,70 @@
+.EBWishsingle <-
+function(S,z,gamma,n,happrox){
+#S needs to be the covariance matrix not the correlation matrix.
+
+r=cov2cor(S)
+r=r[lower.tri(r)]
+
+vmat<-matrix(diag(S),nrow=nrow(S),ncol=nrow(S))
+vmat2<-matrix(diag(S),nrow=nrow(S),ncol=nrow(S),byrow=TRUE)
+
+multiplier<-sqrt(vmat*vmat2)
+zcov<-z*multiplier
+diag(z)<-diag(S)
+diag(zcov)<-diag(S)
+#so now zcov is made up of diagonal sample variances and estimated correlations (converted to estimated covariances using the multiplier) These are fixed or mixed depending on what for z is passed from initial function. z is sample variances and gamma estimates for correlations.
+
+#now move onto calculation of the d.f (lambda the second parameter of the IW):
+
+
+#hpprox- hypergeometric approximations:
+if(happrox){
+	rsq<-1-((n-2)/(n-1))*(1-r^2)*hyperg_2F1(1,1,(n+1)/2,(1-r^2))
+}else{
+	rsq<-r^2
+}
+rsqm<-matrix(0,nrow=nrow(S),ncol=nrow(S))
+rsqm[lower.tri(rsqm)]<-rsq
+rst<-t(rsqm)
+rsqm[upper.tri(rsqm)]<-rst[upper.tri(rst)]
+
+if(happrox){
+	hg<-r*hyperg_2F1(0.5,0.5,(n-1)/2,1-r^2)
+}else{
+	#use sample correlations
+	hg<-r
+}
+hgm<-matrix(0,nrow=nrow(S),ncol=nrow(S))
+hgm[lower.tri(hgm)]<-hg
+hgt<-t(hgm)
+hgm[upper.tri(hgm)]<-hgt[upper.tri(hgt)]
+
+#replaced gamma with z as no longer a flat prior
+knmat<-(rsqm-2*hgm*z-z^2)
+denom<-(1-z^2)^2
+knoffdiag<-knmat[lower.tri(knmat)]
+
+
+ksq<-sum(knoffdiag)/(sum(denom[lower.tri(denom)]))
+ifelse(ksq<=0,lambda<-n,lambda<-(1/ksq)-3)
+if(lambda<1){lambda=1}
+
+unsmoothsigma<-(lambda*zcov+S*(n-1))/(lambda+n)
+
+#the smoothing modification to the variances (diagonal entries)
+z1<-matrix(diag(zcov),nrow=nrow(S),ncol=ncol(S))
+z2<-matrix(diag(zcov),nrow=nrow(S),ncol=ncol(S),byrow=TRUE)
+multiplier2<-sqrt(vmat*vmat2/z1*z2)
+smoothsigma<-unsmoothsigma
+diag(smoothsigma)<-diag(unsmoothsigma)*diag(multiplier2)
+
+return(list(smoothsigma=smoothsigma,unsmoothsigma=unsmoothsigma,ksq=ksq,lambda=lambda,zcov=zcov))
+}
+
 .EBWishartc <-
-function(S,cutoff=0.5){
+function(S,cutoff=0.5,n){
 	
-n=ncol(S)
+#n=ncol(S)
 r=cov2cor(S)
 r=r[lower.tri(S)]
 #inc<-r!=0
@@ -58,10 +121,11 @@ diag(smoothsigma)<-diag(unsmoothsigma)*diag(multiplier2)
 return(list(smoothsigma=unsmoothsigma,unsmoothsigma=unsmoothsigma,ksq=ksq,lambda=lambda))
 }
 .EBEMWishart <-
-function(S){
+function(S,n){
 #S needs to be the covariance matrix not the correlation matrix.
 #print(S)	
-n=ncol(S)
+#n=ncol(S)
+n=n
 k<-S[lower.tri(S)]
 r=cov2cor(S)
 r=r[lower.tri(S)]

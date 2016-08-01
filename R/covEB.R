@@ -1,5 +1,5 @@
 covEB <-
-function(Covmat,delta=0.1,shift=0.05,cutoff=NULL,startlambda=0.5){
+function(Covmat,delta=0.1,shift=0.05,cutoff=NULL,startlambda=0.5,n){
 	#check data and parameter inputs are in valid range:
 	eigen<-eigen(Covmat)$values
 	check<-all(eigen>0)
@@ -15,6 +15,11 @@ function(Covmat,delta=0.1,shift=0.05,cutoff=NULL,startlambda=0.5){
 	if(startlambda>1){
 		stop('Starting lambda value must be less than 1')
 	}
+	if(is.null(colnames(Covmat))){
+		cnames<-paste("V",1:ncol(Covmat),sep="")
+		rownames(Covmat)<-cnames
+		colnames(Covmat)<-cnames	
+	}
 	origmat<-Covmat
 	Cormat<-cov2cor(Covmat)
 	Cormat<-abs(Cormat)
@@ -25,10 +30,14 @@ function(Covmat,delta=0.1,shift=0.05,cutoff=NULL,startlambda=0.5){
 	s=startlambda
 	covlist<-list()
 	i=1
+	
 
 	resultsmat<-matrix(0,nrow=nrow(Cormat),ncol=ncol(Cormat))
+	colnames(resultsmat)<-colnames(Covmat)
+	rownames(resultsmat)<-colnames(Covmat)
 	
-	countmat<-matrix(0,nrow=nrow(Cormat),ncol=ncol(Cormat))
+	countmat<-Covmat
+	countmat<-countmat*0
 	while(s<(maxl-delta)){
 		lseq<-seq(from=s,to=maxl,by=delta)
 		s=s+shift
@@ -45,7 +54,7 @@ function(Covmat,delta=0.1,shift=0.05,cutoff=NULL,startlambda=0.5){
 			reslist<-list(length=nocl)
 			uncon<-c()
 			for(i in 1:nocl){
-				w<-which(mem==i)
+				w<-names(which(mem==i))
 				#m<-Covmat[w,w]
 				check<-temp[w,w]
 				
@@ -60,11 +69,11 @@ function(Covmat,delta=0.1,shift=0.05,cutoff=NULL,startlambda=0.5){
 					}
 				if(sum(abs(check))>0&&length(w)>1){
 					if(is.null(cutoff)){
-						reslist[[i]]<-.EBEMWishart(m)
+						reslist[[i]]<-.EBEMWishart(m,n)
 					}else{
-						reslist[[i]]<-.EBWishartc(m,cutoff=cutoff)
+						reslist[[i]]<-.EBWishartc(m,cutoff=cutoff,n)
 					}
-					outmat<-cov2cor(reslist[[i]]$smoothsigma)
+					outmat<-cov2cor(reslist[[i]]$unsmoothsigma)
 					outmat[check==0]<-0
 					#replace w,w with check!=0
 					
