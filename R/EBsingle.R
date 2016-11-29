@@ -1,4 +1,4 @@
-EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE){
+EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL){
 	#check data and parameter inputs are in valid range:
 	eigen<-eigen(Covmat)$values
 	check<-all(eigen>0)
@@ -17,6 +17,9 @@ EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE){
 		rownames(Covmat)<-cnames
 		colnames(Covmat)<-cnames	
 	}
+	reslist<-list()
+		
+	if(is.null(groups)){
 			temp<-Cormat
 			
 			temp[abs(temp)<startlambda]<-0
@@ -24,9 +27,7 @@ EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE){
 			tempclust<-clusters(graph.adjacency(temp,mode="upper",weighted=TRUE))
 			mem<-tempclust$membership
 			nocl<-max(mem)
-			#reslist<-list(length=nocl)
-			reslist<-list()
-			uncon<-c()
+			
 			fullmat<-matrix(0,nrow=nrow(Covmat),ncol=ncol(Covmat))
 			diag(fullmat)<-1
 			rownames(fullmat)<-rownames(Covmat)
@@ -58,6 +59,52 @@ EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE){
 
 						
 					}
+					
+				}else{
+					#user has passed a set of pre-defined groupings.
+					if(!is.list(groups)){
+						stop('Input groups needs to be a list of groupings')
+					}
+					nocl<-length(groups)
+					allnames<-unlist(groups)
+					if(length(allnames)!=nrow(Covmat)){
+						stop('Please provide a group for each variable in Covmat. Dimensions do not match.')
+					}
+					fullmat<-matrix(0,nrow=nrow(Covmat),ncol=ncol(Covmat))
+					diag(fullmat)<-1
+					rownames(fullmat)<-allnames
+					colnames(fullmat)<-allnames
+		
+				z<-matrix(1,nrow=length(allnames),ncol=length(allnames))
+				rownames(z)<-allnames
+				colnames(z)<-allnames
+					for(i in 1:length(groups)){
+						w<-groups[[i]]
+						
+						#set entries outside block to zero:
+						z[w,!(colnames(z)%in%w)]<-0
+						z[!(colnames(z)%in%w),w]<-0
+						
+						#use as initial estimate of gamma
+						ct<-Cormat[w,w]
+						if(happrox){
+							rijs<-ct[lower.tri(ct)]
+							rhoijs<-rijs*hyperg_2F1(0.5,0.5,(n-1)/2,1-rijs^2)
+							gamma<-mean(rhoijs)
+						}else{
+							
+							gamma<-mean(ct[lower.tri(ct)])
+						}
+							
+						z[w,w]<-gamma
+
+
+						
+					}
+
+				}
+				
+				
 				#now run algorithm on all genes with block diagonal z prior:
 				diag(z)<-1
 				reslist<-.EBWishsingle(S=Covmat,z=z,gamma=gamma,n,happrox)

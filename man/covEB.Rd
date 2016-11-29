@@ -30,9 +30,7 @@ This determines a lower noise level for the correlations, for example, it defaul
 \item{n}{
 The number of samples (replicates) used to calculate Covmat}
 }
-\details{
 
-}
 \value{
 Returns the estimated correlation matrix.
 }

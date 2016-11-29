@@ -7,7 +7,7 @@ Empirical Bayes estimate of block diagonal correlation matrix
 Assuming a block diagonal structure of the correlation matrix, the function calculates and empirical Bayes estimate of the original covariance matrix. The algorithm assumes a single block diagonal prior with one shrinkage threshold determining significance of correlations. 
 }
 \usage{
-EBsingle(Covmat, startlambda = 0.5, n, happrox=FALSE)
+EBsingle(Covmat, startlambda = 0.5, n, happrox=FALSE,groups=NULL)
 }
 \arguments{
   \item{Covmat}{
@@ -16,7 +16,7 @@ A sample covariance matrix. Must be positive semi-definite, is converted to a co
 
 
   \item{startlambda}{
-This determines a lower noise level for the correlations, for example, it defaults to 0.5. This means that all correlation values below 0.5 will be set to zero (assumed to be noise).
+This determines a lower noise level for the correlations, for example, it defaults to 0.5. This means that all correlation values below 0.5 will be set to zero (assumed to be noise). This will be used if groups parameter is not specified.
 }
 
 \item{n}{
@@ -25,10 +25,11 @@ The number of samples (replicates) used to calculate Covmat}
 \item{happrox}{
 Logical indicating whether or not to use a hypergeometric distribution estimation of the correlations. The alternative is to take the sample average of the correlations. FALSE by default.
 }
+\item{groups}{
+	Optional list of groups of variables from Covmat that are used to define the block diagonal structure of the prior.
 }
-\details{
+}
 
-}
 \value{
 Returns the estimated correlation matrix.
 }
