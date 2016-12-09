@@ -12,7 +12,7 @@
 The DESCRIPTION file:
 \packageDESCRIPTION{covEB}
 \packageIndices{covEB}
-The function for this package is covEB that calculates an empirical Bayes estimate of a given covariance matrix assuming that is has a block diagonal structure.
+The function for this package is EBsingle that calculates an empirical Bayes estimate of a given covariance matrix assuming that is has a block diagonal structure.
 }
 \author{
 \packageAuthor{covEB}
