@@ -30,7 +30,7 @@
 <<echo=FALSE>>=
 options(width=60)
 @
-In Bioinformatics, one commonly used tool in differential expression analysis has been an empirical Bayes approach to estimating variances. This method was shown to reduce the false positive rates, particularly at low sample sizes. Small sample sizes are by monetary necessity, common place in experiments. This method, combines information across genes, shrinking the gene -specific variances to a common variance across all genes. Because this approach is used in linear regressions, we hypothesised that a similar methodology could be used with correlations as these are linear regressions between two variables. 
+In Bioinformatics, one commonly used tool in differential expression analysis has been an empirical Bayes approach to estimating variances. This method was shown to reduce the false positive rates, particularly at low sample sizes. Small sample sizes are by monetary necessity, common place in experiments. This method, combines information across genes, shrinking the gene-specific variances to a common variance across all genes. Because this approach is used in linear regressions, we hypothesised that a similar methodology could be used with correlations as these are linear regressions between two variables. 
 Correlation matrices are important in inferring relationships and networks between regulatory or signalling elements. As the sample sizes for experiments are small, these correlations can be difficult to estimate and can exhibit high false positive rates. This package is designed to reduce these false positive rates and therefore direct the researcher to higher value relationships that are more likely to be validated experimentally. At a genome-wide scale estimation of correlation matrices can also be computationally demanding.
 This package provides an empirical Bayes approach to improve covariance estimates for gene expression, where we assume the covariance matrix has block diagonal form. These covariance matrices can be estimates from either microarray or RNA-seq data.
 
@@ -43,15 +43,15 @@ library(covEB)
  
  	samplecov<-cov(x)
  
- 	test<-covEB(samplecov,delta=0.05,shift=0.025,startlambda=0.4,n=500)
+ 	test<-EBsingle(samplecov,startlambda=0.4,n=500)
 
-
+	test2<-EBsingle(samplecov,groups=list(c(1),c(2)),n=500)
 @
-In this example there are three parameters excluding the covariance matrix, samplecov. These are delta, shift and startlambda. These three parameters together control the correlation ranges that define each of the blocks for which the empirical Bayes estimate is calculated. covEB is a novel iterative block diagonal algorithm for estimating the correlation matrix. Instead of one prior matrix for the full correlation matrix, we identify blocks of correlated elements for a given correlation range. Consequently we use a range of shrinkage values ($\theta's$) for each block and calculate the empirical Bayes estimate for each of these. We use a range to allow for noise in the data for example, if we assume the correlation for a block $b$ is $\theta_{b}$ and we there is noise in our data of $delta$ then the range of correlation values would be $(\theta_{b}-delta/2,\theta_{b} +delta/2)$. Values outside the current range are set to zero to determine the diagonal block structure.
-From a starting threshold (startlambda) the two user selected parameters determine the size of the interval (delta) and the size of the shift in moving the starting threshold (shift). This shift value means that the range values used are overlapping rather than mutually exclusive. The block diagonal structure of the correlation matrix is determined using the current range and the empirical Bayesian estimation for each block performed separately. The final estimate is an average of each non zero estimation. Setting $startlambda>0$ will aid computation time as any correlations under this level are set to zero and may also be used to reduce noise in the data, by assuming any correlation below the value of startlambda is noise.
+In this example we pass the sample covariance matrix (samplecov) to the function EBsingle. In addition we give the number of samples used to calculate the covariance matrix, in this case 500. The third parameter startlambda is a thresholding parameter that is used to determine the block diagonal structure of the matrix. Once the block diagonal structure is known, the average of the correlations within each block is used to create the block diagonal prior that has a flat correlation structure within each block. An alternative approach is shown in test2 where the groupings of the variables is assumed to be known, this information is then passed to the function as a list of elements in each block.
+
 
 \subsection{Example with biological data}
-Here we use a data set available from bioconductor to demonstrate how covEB can be used in the pipeline analysis of gene expression data. We load the data package curatedBladderData that contains gene expression from bladder cancer patients in the R object type expression set. We get the gene expression data matrix, this contains around 5,000 probes from microarrays with 40 samples and store this in the matrix Edata.
+Here we use a data set available from bioconductor to demonstrate how the covEB package can be used in the pipeline analysis of gene expression data. We load the data package curatedBladderData that contains gene expression from bladder cancer patients in the R object type expression set. We get the gene expression data matrix, this contains around 5,000 probes from microarrays with 40 samples and store this in the matrix Edata.
 <<>>=
 library(curatedBladderData)
 
@@ -68,7 +68,7 @@ edata<-Edata[which(variances>quantile(variances,0.8)),]
 covmat<-cov(t(edata))
 cormat<-cov2cor(covmat)
 #we are now able to use covmat as input into covEB:
-out<-covEB(covmat,0.2,0.1,startlambda=0.6,n=40)
+out<-EBsingle(covmat,startlambda=0.6,n=40)
 @
 
 We now provide an example of how the output may be used. We can visualise the correlations between genes using functions available in R and its associated packages. First we use simple thresholding to define significant correlations, we create adjacency matrices for graphs, setting correlations below 0.65 to zero.
