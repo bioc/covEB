@@ -1,3 +1,63 @@
+.AicW<-function(S,z){
+	np<-z[lower.tri(z)]
+	p<-sum(np!=0)
+	v<-ncol(z)
+	aic<-2*p-2*dwishart(S,v,z,TRUE)
+	return(aic)
+}
+
+.AicN<-function(x,z){
+	np<-z[lower.tri(z)]
+	p<-sum(np!=0)
+	#assume x is rows are observations, columns are variables
+	muest<-colMeans(x)
+	aic<-2*p-sum(2*dmvnorm(x,muest,z,TRUE))
+	return(aic)
+}
+
+
+.SelThresh<-function(S,data=NULL,dist=c("N","IW")){
+
+	if(!is.positive.definite(S)){
+		S<-nearPD(S)$mat
+		S<-as.matrix(S)
+	}
+	dist<-match.arg(dist)
+	Sc<-cov2cor(S)
+	Sc<-as.matrix(Sc)
+	sl<-Sc[lower.tri(Sc)]
+	sl<-abs(sl)
+	lamrange<-seq(median(sl),max(sl)-0.1,by=0.01)
+	outm<-matrix(0,nrow=length(lamrange),ncol=2)
+	outm[,1]<-lamrange
+	for(i in 1:length(lamrange)){
+		ztemp<-Sc
+		ztemp[abs(ztemp)<lamrange[i]]<-0
+		gz<-graph.adjacency(ztemp,mode="upper",weighted=TRUE)
+		zclust<-clusters(gz)
+		zm<-zclust$membership
+		nc<-max(zm)
+		z<-diag(0,nrow=nrow(S),ncol=ncol(S))
+		for(j in 1:nc){
+			sel<-which(zm==j)
+			z[sel,sel]<-S[sel,sel]
+		}
+		if(dist=="N"){
+			if(is.null(data)){
+				stop('Data needs to be provided to use MVN likelihood')
+			}
+			aico<-.AicN(data,z)
+		}else{
+			aico<-.AicW(S,z)}
+			
+		outm[i,2]<-aico
+		
+	}
+	wm<-min(outm[,2],na.rm=TRUE)
+	swm<-which(outm[,2]==wm)
+	
+	return(outm[swm[1],1])	
+}
 .EBWishsingle <-
 function(S,z,gamma,n,happrox){
 #S needs to be the covariance matrix not the correlation matrix.

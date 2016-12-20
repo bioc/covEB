@@ -1,10 +1,14 @@
-EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL){
+EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL,aic=TRUE,data=NULL){
+	if(aic&&is.null(data)){
+		stop('Data needs to be provided to use AIC')
+	}
 	#check data and parameter inputs are in valid range:
 	eigen<-eigen(Covmat)$values
 	check<-all(eigen>0)
 	#if(!check){
 	#	stop('Covariance matrix is not positive definite')
 	#}
+	
 	if(startlambda>1){
 		stop('Starting lambda value must be less than 1')
 	}
@@ -18,7 +22,10 @@ EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL){
 		colnames(Covmat)<-cnames	
 	}
 	reslist<-list()
-		
+	
+	if(aic){
+		startlambda<-.selThresh(Covmat,data)
+	}
 	if(is.null(groups)){
 			temp<-Cormat
 			
