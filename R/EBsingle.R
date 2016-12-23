@@ -1,4 +1,4 @@
-EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL,aic=TRUE,data=NULL){
+EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL,aic=FALSE,data=NULL){
 	if(aic&&is.null(data)){
 		stop('Data needs to be provided to use AIC')
 	}
