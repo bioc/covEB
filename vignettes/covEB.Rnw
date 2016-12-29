@@ -42,14 +42,23 @@ library(covEB)
 	x <- rmvnorm(n=500, mean=c(1,2), sigma=sigma)
  
  	samplecov<-cov(x)
- 
+
+
  	test<-EBsingle(samplecov,startlambda=0.4,n=500)
-
-	test2<-EBsingle(samplecov,groups=list(c(1),c(2)),n=500)
 @
-In this example we pass the sample covariance matrix (samplecov) to the function EBsingle. In addition we give the number of samples used to calculate the covariance matrix, in this case 500. The third parameter startlambda is a thresholding parameter that is used to determine the block diagonal structure of the matrix. Once the block diagonal structure is known, the average of the correlations within each block is used to create the block diagonal prior that has a flat correlation structure within each block. An alternative approach is shown in test2 where the groupings of the variables is assumed to be known, this information is then passed to the function as a list of elements in each block.
 
+In this example we pass the sample covariance matrix (samplecov) to the function EBsingle. In addition we give the number of samples used to calculate the covariance matrix, in this case 500. The third parameter startlambda is a thresholding parameter that is used to determine the block diagonal structure of the matrix. Once the block diagonal structure is known, the average of the correlations within each block is used to create the block diagonal prior that has a flat correlation structure within each block. An alternative approach is shown below in test2 where the groupings of the variables is assumed to be known, this information is then passed to the function as a list of elements in each block.
+<<>>=
 
+ 	sigma <- matrix(c(4,2,0.5,0.5,2,3,0.5,0.5,0.5,0.5,3,2.5,0.5,0.5,2.5,4), ncol=4)
+	x <- rmvnorm(n=500, mean=c(1,2,1.5,2.5), sigma=sigma)
+ 
+ 	samplecov<-cov(x)
+	vnames<-paste("a",1:4,sep="")
+	rownames(samplecov)<-vnames
+	colnames(samplecov)<-vnames
+	test2<-EBsingle(samplecov,groups=list(c("a1","a2"),c("a3","a4")),n=500)
+@
 \subsection{Example with biological data}
 Here we use a data set available from bioconductor to demonstrate how the covEB package can be used in the pipeline analysis of gene expression data. We load the data package curatedBladderData that contains gene expression from bladder cancer patients in the R object type expression set. We get the gene expression data matrix, this contains around 5,000 probes from microarrays with 40 samples and store this in the matrix Edata.
 <<>>=
@@ -68,23 +77,23 @@ edata<-Edata[which(variances>quantile(variances,0.8)),]
 covmat<-cov(t(edata))
 cormat<-cov2cor(covmat)
 #we are now able to use covmat as input into covEB:
-out<-EBsingle(covmat,startlambda=0.6,n=40)
+out<-EBsingle(covmat,startlambda=0.5,n=40)
 @
 
-We now provide an example of how the output may be used. We can visualise the correlations between genes using functions available in R and its associated packages. First we use simple thresholding to define significant correlations, we create adjacency matrices for graphs, setting correlations below 0.65 to zero.
+We now provide an example of how the output may be used. We can visualise the correlations between genes using functions available in R and its associated packages. First we use simple thresholding to define significant correlations, we create adjacency matrices for graphs, setting correlations below 0.5 to zero.
 <<>>=
 outmat<-out
-outmat[abs(out)<0.65]<-0
-outmat[abs(out)>=0.65]<-1
+outmat[abs(out)<0.5]<-0
+outmat[abs(out)>=0.5]<-1
 @
-We find connected subgraphs in the adjacency matrix using the clusters function and then select one of the subgraphs (number 5) that has 12 genes in it. Finally, for visualisation purposes, we remove edges between nodes and themselves (i.e. the diagonal)
+We find connected subgraphs in the adjacency matrix using the clusters function and then select one of the subgraphs (number 6) that has 12 genes in it. Finally, for visualisation purposes, we remove edges between nodes and themselves (i.e. the diagonal)
 <<>>=
 clusth<-clusters(graph.adjacency(outmat))
-sel<-which(clusth$membership==5)
+sel<-which(clusth$membership==6)
 subgraphEB<-outmat[sel,sel]
 subgraph<-cormat[sel,sel]
-subgraph[subgraph<0.65]<-0
-subgraph[subgraph>=0.65]<-1
+subgraph[subgraph<0.5]<-0
+subgraph[subgraph>=0.5]<-1
 
 diag(subgraph)<-0
 diag(subgraphEB)<-0
