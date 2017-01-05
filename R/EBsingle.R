@@ -1,4 +1,4 @@
-EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL,aic=FALSE,data=NULL){
+EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL,aic=FALSE,data=NULL,dist=c("W","N")){
 	if(aic&&is.null(data)){
 		stop('Data needs to be provided to use AIC')
 	}
@@ -24,7 +24,7 @@ EBsingle<-function(Covmat,startlambda=0.5,n,happrox=FALSE,groups=NULL,aic=FALSE,
 	reslist<-list()
 	
 	if(aic){
-		startlambda<-.selThresh(Covmat,data)
+		startlambda<-.selThresh(Covmat,data,dist=dist)
 	}
 	if(is.null(groups)){
 			temp<-Cormat

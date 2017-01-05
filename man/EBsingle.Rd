@@ -34,6 +34,7 @@ Logical indicating whether or not to use a hypergeometric distribution estimatio
 \item{data}{
 	Optional data matrix, required when AIC is to be used. The matrix should have observations in rows and variables in the columns.
 }
+\item{dist}{Parameter used when using the AIC option. Either "N" for using the Normal distribution to model the data or "W" to model the sample covariance matrix using a Wishart distribution. Default is "W"}
 }
 
 \value{

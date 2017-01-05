@@ -16,7 +16,7 @@
 }
 
 
-.SelThresh<-function(S,data=NULL,dist=c("N","IW")){
+.SelThresh<-function(S,data=NULL,dist=c("N","W")){
 
 	if(!is.positive.definite(S)){
 		S<-nearPD(S)$mat
