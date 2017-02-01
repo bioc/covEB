@@ -1,3 +1,5 @@
 export(covEB, EBsingle)
 importFrom(stats,cov2cor)
-import(mvtnorm, igraph, gsl, Biobase, LaplacesDemon, Matrix)
+importFrom(LaplacesDemon, is.positive.definite)
+importFrom(Matrix,nearPD)
+import(mvtnorm, igraph, gsl, Biobase)

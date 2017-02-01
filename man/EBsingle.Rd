@@ -7,7 +7,7 @@ Empirical Bayes estimate of block diagonal correlation matrix
 Assuming a block diagonal structure of the correlation matrix, the function calculates and empirical Bayes estimate of the original covariance matrix. The algorithm assumes a single block diagonal prior with one shrinkage threshold determining significance of correlations. 
 }
 \usage{
-EBsingle(Covmat, startlambda = 0.5, n, happrox=FALSE,groups=NULL,aic=FALSE,data=NULL)
+EBsingle(Covmat, startlambda = 0.5, n, happrox=FALSE,groups=NULL,aic=FALSE,data=NULL,dist=c("W","N"))
 }
 \arguments{
   \item{Covmat}{
@@ -34,7 +34,7 @@ Logical indicating whether or not to use a hypergeometric distribution estimatio
 \item{data}{
 	Optional data matrix, required when AIC is to be used. The matrix should have observations in rows and variables in the columns.
 }
-\item{dist}{Parameter used when using the AIC option. Either "N" for using the Normal distribution to model the data or "W" to model the sample covariance matrix using a Wishart distribution. Default is "W"}
+\item{dist}{Parameter used when using the AIC option. Either "N" for using the Normal distribution to model the data or "W" to model the sample covariance matrix using a Wishart distribution. Default is "W".}
 }
 
 \value{
