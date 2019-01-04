@@ -1,7 +1,7 @@
 Package: covEB
 Type: Package
 Title: Empirical Bayes estimate of block diagonal covariance matrices
-Version: 1.8.0
+Version: 1.8.1
 Date: 2017-01-29
 Author: C. Pacini
 Maintainer: C. Pacini <clarepacini@gmail.com>
@@ -13,5 +13,5 @@ Description: Using bayesian methods to estimate correlation matrices
 License: GPL-3
 Depends: R (>= 3.3), mvtnorm, igraph, gsl, Biobase, stats, LaplacesDemon, Matrix
 Suggests: curatedBladderData
-biocViews: Bayesian, Microarray, RNASeq, Preprocessing, Software,
+biocViews: ImmunoOncology, Bayesian, Microarray, RNASeq, Preprocessing, Software,
         GeneExpression, StatisticalMethod
